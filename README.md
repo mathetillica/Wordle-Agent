@@ -76,9 +76,9 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Web Search (Perplexica) - Disabled by default
 # To enable web search capabilities:
 # 1. Follow setup at: https://github.com/simular-ai/Agent-S#setup-retrieval-from-web-using-perplexica
-# 2. Uncomment and set: PERPLEXICA_URL=http://localhost:3000/api/search
-# 3. Change USE_SEARCH_ENGINE to true
-USE_SEARCH_ENGINE=false
+# 2. Set PERPLEXICA_URL=http://localhost:3000/api/search
+# 3. Change SEARCH_ENGINE from "none" to "Perplexica"
+SEARCH_ENGINE=none
 PERPLEXICA_URL=
 
 # Remote execution (requires orgo.ai account)
@@ -87,11 +87,13 @@ ORGO_API_KEY=...
 
 # Model settings
 AGENT_MODEL=gpt-4o
-GROUNDING_MODEL_PROVIDER=anthropic
+AGENT_MODEL_TYPE=openai
 GROUNDING_MODEL=claude-3-7-sonnet-20250219
+GROUNDING_MODEL_TYPE=anthropic
 
-# Execution settings
-MAX_STEPS=25
+# Other settings
+EMBEDDING_TYPE=openai
+MAX_STEPS=10
 STEP_DELAY=0.5
 ```
 
@@ -132,7 +134,7 @@ Agent S2 can use web search for better performance. To enable:
 
 ## Troubleshooting
 
-**"PERPLEXICA_URL environment variable not set"** → Set `USE_SEARCH_ENGINE=false` in `.env` or follow the web search setup
+**"PERPLEXICA_URL environment variable not set"** → Set `SEARCH_ENGINE=none` in `.env` or follow the web search setup
 
 **"Module not found"** → `pip install -r requirements.txt`
 
