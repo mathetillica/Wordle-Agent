@@ -1,0 +1,5 @@
+gui-agents
+pyautogui
+python-dotenv
+orgo
+pillow
