@@ -73,14 +73,45 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 # ===== OPTIONAL =====
 
+# Web Search (Perplexica) - Disabled by default
+# To enable web search capabilities:
+# 1. Follow setup at: https://github.com/simular-ai/Agent-S#setup-retrieval-from-web-using-perplexica
+# 2. Uncomment and set: PERPLEXICA_URL=http://localhost:3000/api/search
+# 3. Change USE_SEARCH_ENGINE to true
+USE_SEARCH_ENGINE=false
+PERPLEXICA_URL=
+
 # Remote execution (requires orgo.ai account)
 USE_CLOUD_ENVIRONMENT=false
 ORGO_API_KEY=...
 
-# Misc settings
+# Model settings
 AGENT_MODEL=gpt-4o
-MAX_STEPS=10
+GROUNDING_MODEL_PROVIDER=anthropic
+GROUNDING_MODEL=claude-3-7-sonnet-20250219
+
+# Execution settings
+MAX_STEPS=25
 STEP_DELAY=0.5
+```
+
+## Python Code Update
+
+Make sure your `agent_s2.py` disables the search engine by default:
+
+```python
+# When initializing Agent S2, use the environment variable
+search_engine = "Perplexica" if os.getenv("USE_SEARCH_ENGINE", "false").lower() == "true" else None
+
+agent = AgentS2(
+    engine_params,
+    grounding_agent,
+    platform=current_platform,
+    action_space="pyautogui",
+    observation_type="screenshot",
+    search_engine=search_engine,  # Now defaults to None unless enabled
+    embedding_engine_type="openai"
+)
 ```
 
 ## Remote Setup
@@ -91,7 +122,17 @@ To control a cloud Linux desktop instead of your local machine:
 2. Add `ORGO_API_KEY` to `.env`
 3. Run with `USE_CLOUD_ENVIRONMENT=true python agent_s2.py`
 
+## Web Search Setup (Optional)
+
+Agent S2 can use web search for better performance. To enable:
+
+1. Install Docker Desktop
+2. Follow the [Perplexica setup guide](https://github.com/simular-ai/Agent-S#setup-retrieval-from-web-using-perplexica)
+3. Set `USE_SEARCH_ENGINE=true` and `PERPLEXICA_URL` in `.env`
+
 ## Troubleshooting
+
+**"PERPLEXICA_URL environment variable not set"** → Set `USE_SEARCH_ENGINE=false` in `.env` or follow the web search setup
 
 **"Module not found"** → `pip install -r requirements.txt`
 
