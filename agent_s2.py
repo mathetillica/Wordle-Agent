@@ -115,6 +115,7 @@ def run_task(agent, executor, instruction):
 
 def main():
     executor = RemoteExecutor() if CONFIG["remote"] else LocalExecutor()
+    print(f"💻 Using {executor.__class__.__name__}")
     agent = create_agent(executor)
     
     if len(sys.argv) > 1:
