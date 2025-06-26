@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import io
-import sys
-import time
+import os, io, sys, time
 from dotenv import load_dotenv
 from gui_agents.s2.agents.agent_s import AgentS2
 from gui_agents.s2.agents.grounding import OSWorldACI
@@ -17,7 +14,7 @@ CONFIG = {
     "model_type": os.getenv("AGENT_MODEL_TYPE", "openai"),
     "grounding_model": os.getenv("GROUNDING_MODEL", "claude-3-7-sonnet-20250219"),
     "grounding_type": os.getenv("GROUNDING_MODEL_TYPE", "anthropic"),
-    "search_engine": os.getenv("SEARCH_ENGINE", "Perplexica"),
+    "search_engine": os.getenv("SEARCH_ENGINE", "none"),
     "embedding_type": os.getenv("EMBEDDING_TYPE", "openai"),
     "max_steps": int(os.getenv("MAX_STEPS", "10")),
     "step_delay": float(os.getenv("STEP_DELAY", "0.5")),
@@ -25,56 +22,45 @@ CONFIG = {
 }
 
 
-class LocalExecutor:
-    def __init__(self):
-        self.pyautogui = pyautogui
-        if sys.platform == "win32":
-            self.platform = "windows"
-        elif sys.platform == "darwin":
-            self.platform = "darwin"
-        else:
+class Executor:
+    def __init__(self, remote=False):
+        self.remote = remote
+        if remote:
+            self.computer = Computer()
             self.platform = "linux"
+        else:
+            self.pyautogui = pyautogui
+            self.platform = {"win32": "windows", "darwin": "darwin"}.get(sys.platform, "linux")
     
     def screenshot(self):
-        img = self.pyautogui.screenshot()
+        img = self.computer.screenshot() if self.remote else self.pyautogui.screenshot()
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
         buffer.seek(0)
         return buffer.getvalue()
     
     def exec(self, code):
-        exec(code, {"pyautogui": self.pyautogui, "time": time})
-
-
-class RemoteExecutor:
-    def __init__(self):
-        self.computer = Computer()
-        self.platform = "linux"
-    
-    def screenshot(self):
-        return self.computer.screenshot_base64()
-    
-    def exec(self, code):
-        result = self.computer.exec(code)
-        if not result['success']:
-            raise Exception(result.get('error', 'Execution failed'))
-        if result['output']:
-            print(f"Output: {result['output']}")
+        if self.remote:
+            result = self.computer.exec(code)
+            if not result.get('success', True):
+                raise Exception(result.get('error', 'Execution failed'))
+            if output := result.get('output', '').strip():
+                print(f"📤 {output}")
+        else:
+            exec(code, {"pyautogui": self.pyautogui, "time": time})
 
 
 def create_agent(executor):
-    engine_params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
-    grounding_params = {"engine_type": CONFIG["grounding_type"], "model": CONFIG["grounding_model"]}
-    
-    grounding_agent = OSWorldACI(
-        platform=executor.platform,
-        engine_params_for_generation=engine_params,
-        engine_params_for_grounding=grounding_params
-    )
+    params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
+    grounding = {
+        "engine_type": CONFIG["grounding_type"], 
+        "model": CONFIG["grounding_model"],
+        **({"grounding_width": 1366, "grounding_height": 768} if CONFIG["grounding_type"] == "anthropic" else {})
+    }
     
     return AgentS2(
-        engine_params=engine_params,
-        grounding_agent=grounding_agent,
+        engine_params=params,
+        grounding_agent=OSWorldACI(executor.platform, params, grounding),
         platform=executor.platform,
         action_space="pyautogui",
         observation_type="screenshot",
@@ -84,28 +70,30 @@ def create_agent(executor):
 
 
 def run_task(agent, executor, instruction):
-    print(f"\n🤖 Task: {instruction}")
-    print(f"📍 Mode: {'Remote' if CONFIG['remote'] else 'Local'}\n")
+    print(f"\n🤖 Task: {instruction}\n")
+    done_count = 0
     
     for step in range(CONFIG["max_steps"]):
         print(f"Step {step + 1}/{CONFIG['max_steps']}")
         
-        obs = {"screenshot": executor.screenshot()}
-        info, action = agent.predict(instruction=instruction, observation=obs)
-        
-        if info:
-            print(f"💭 {info}")
-        
-        if not action or not action[0]:
-            print("✅ Complete")
-            return True
-        
         try:
+            info, action = agent.predict(instruction=instruction, observation={"screenshot": executor.screenshot()})
+            if info: print(f"💭 {info}")
+            
+            if not action or not action[0] or action[0].strip().upper() == "DONE":
+                done_count += 1
+                if done_count >= 2:
+                    print("✅ Complete!")
+                    return True
+                continue
+            
+            done_count = 0
             print(f"🔧 {action[0]}")
             executor.exec(action[0])
+            
         except Exception as e:
             print(f"❌ Error: {e}")
-            instruction = "The previous action failed. Try a different approach."
+            done_count = 0
         
         time.sleep(CONFIG["step_delay"])
     
@@ -114,20 +102,22 @@ def run_task(agent, executor, instruction):
 
 
 def main():
-    executor = RemoteExecutor() if CONFIG["remote"] else LocalExecutor()
-    print(f"💻 Using {executor.__class__.__name__}")
-    agent = create_agent(executor)
-    
-    if len(sys.argv) > 1:
-        run_task(agent, executor, " ".join(sys.argv[1:]))
-    else:
+    try:
+        executor = Executor(CONFIG["remote"])
+        agent = create_agent(executor)
+        
+        if len(sys.argv) > 1:
+            sys.exit(0 if run_task(agent, executor, " ".join(sys.argv[1:])) else 1)
+        
         print("🎮 Interactive Mode (type 'exit' to quit)\n")
-        while True:
-            task = input("Task: ").strip()
-            if task == "exit":
-                break
-            elif task:
-                run_task(agent, executor, task)
+        while (task := input("Task: ").strip()) != "exit":
+            if task: run_task(agent, executor, task)
+            
+    except KeyboardInterrupt:
+        print("\n⚠️ Interrupted")
+    except Exception as e:
+        print(f"❌ Fatal error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
