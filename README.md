@@ -20,7 +20,7 @@ cd agent-s2-example
 
 # Create virtual environment
 python3.11 -m venv venv # On Mac/Linux
-py -3.11 -m venv .venv # On Windows
+py -3.11 -m venv venv # On Windows
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
