@@ -2,12 +2,11 @@
 
 import os, io, sys, time
 from dotenv import load_dotenv
+load_dotenv()
 from gui_agents.s2.agents.agent_s import AgentS2
 from gui_agents.s2.agents.grounding import OSWorldACI
 from orgo import Computer
 import pyautogui
-
-load_dotenv()
 
 CONFIG = {
     "model": os.getenv("AGENT_MODEL", "gpt-4o"),
