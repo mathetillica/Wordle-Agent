@@ -113,7 +113,7 @@ agent = AgentS2(
     action_space="pyautogui",
     observation_type="screenshot",
     search_engine=search_engine,  # Now defaults to None unless enabled
-    embedding_engine_type="openai"
+    embedding_engine_type="gemini"
 )
 ```
 

@@ -1,5 +1,2 @@
-gui-agents
-pyautogui
-python-dotenv
-orgo
-pillow
+##orgo-ai-s2-example-requirements
+##agent-s2-requirements

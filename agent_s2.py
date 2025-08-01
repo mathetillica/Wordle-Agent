@@ -9,12 +9,12 @@ from orgo import Computer
 import pyautogui
 
 CONFIG = {
-    "model": os.getenv("AGENT_MODEL", "gpt-4o"),
-    "model_type": os.getenv("AGENT_MODEL_TYPE", "openai"),
-    "grounding_model": os.getenv("GROUNDING_MODEL", "claude-3-7-sonnet-20250219"),
-    "grounding_type": os.getenv("GROUNDING_MODEL_TYPE", "anthropic"),
+    "model": os.getenv("AGENT_MODEL", ""),
+    "model_type": os.getenv("AGENT_MODEL_TYPE", ""),
+    "grounding_model": os.getenv("GROUNDING_MODEL", ""),
+    "grounding_type": os.getenv("GROUNDING_MODEL_TYPE", ""),
     "search_engine": os.getenv("SEARCH_ENGINE", "none"),
-    "embedding_type": os.getenv("EMBEDDING_TYPE", "openai"),
+    "embedding_type": os.getenv("EMBEDDING_TYPE", "gemini"),
     "max_steps": int(os.getenv("MAX_STEPS", "10")),
     "step_delay": float(os.getenv("STEP_DELAY", "0.5")),
     "remote": os.getenv("USE_CLOUD_ENVIRONMENT", "false").lower() == "true"
@@ -51,10 +51,14 @@ class Executor:
 
 def create_agent(executor):
     params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
+    grounding_model_resize_width = 1366
+    screen_width = 1024
+    screen_height = 768
     grounding = {
         "engine_type": CONFIG["grounding_type"], 
         "model": CONFIG["grounding_model"],
-        **({"grounding_width": 1366, "grounding_height": 768} if CONFIG["grounding_type"] == "anthropic" else {})
+        "grounding_width": grounding_model_resize_width,
+        "grounding_height": (screen_height * grounding_model_resize_width) / screen_width
     }
     
     return AgentS2(
