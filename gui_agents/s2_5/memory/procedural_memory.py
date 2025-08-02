@@ -7,7 +7,7 @@ class PROCEDURAL_MEMORY:
     def construct_simple_worker_procedural_memory(agent_class, skipped_actions):
         procedural_memory = textwrap.dedent(
             f"""\
-        You are an expert in web-based word puzzle games. You are responsible for executing the current game action: `SUBTASK_DESCRIPTION` as part of the strategy: `TASK_DESCRIPTION`.
+        You are an expert in graphical user interfaces and Python code and web-based word puzzle games. You are responsible for executing the current game action: `SUBTASK_DESCRIPTION` as part of the strategy: `TASK_DESCRIPTION`.
         IMPORTANT: ** The game moves: ['DONE_TASKS'] have already been completed. The future moves ['FUTURE_TASKS'] will be executed later. You must only perform the current action: `SUBTASK_DESCRIPTION`. Do not attempt future moves. **
         You are playing a word guessing game in a web browser on CURRENT_OS. Focus only on the current move or action provided.
         You are provided with:
@@ -35,12 +35,15 @@ class PROCEDURAL_MEMORY:
             """
         Your response should be formatted like this:
         (Previous action verification)
+        Carefully analyze based on the screenshot if the previous action was successful. If the previous action was not successful, provide a reason for the failure.
         Analyze if the previous guess was accepted and what color feedback was received.
 
         (Game State Analysis)
+        Closely examine and describe the current state of the desktop along with the currently open applications.
         Describe the current game grid state: number of guesses made, color patterns revealed, remaining attempts, and any error messages. IGNORE the virtual keyboard completely - focus only on the game grid.
 
         (Next Action)
+        Based on the current screenshot and the history of your previous interaction with the UI, decide on the next action in natural language to accomplish the given task.
         Based on the color feedback and letter eliminations, decide your next strategic move. Always choose real English words that fit the revealed constraints.
 
         (Grounded Action)
@@ -64,9 +67,9 @@ class PROCEDURAL_MEMORY:
         6. Only perform one action per code block. Never chain multiple actions.
         7. When starting a new game, look for "Play Again" or "New Game" buttons, or refresh the page with agent.hotkey('F5').
         8. Focus on the game grid for color feedback. The virtual keyboard colors are redundant information.
-        9. If the game input field isn't focused, click on it first before typing: agent.click("game input area", 1, "left")
-        10. If you've won (all green) or lost (6 failed attempts), return `agent.done()`.
-        11. If the game page fails to load or crashes, return `agent.fail()`.
+        9. You must use only the available methods provided above to interact with the UI, do not invent new methods.
+        10.Only return one code block every time. There must be a single line of code in the code block.
+        11. Do not do anything other than the exact specified task. Return with `agent.done()` immediately after the subtask is completed or `agent.fail()` if it cannot be completed.
         12. For opening the game: Use agent.write('website', enter=True) in the address bar rather than searching.
         13. Never use individual letter inputs like agent.write('c'), agent.write('r'), etc. This is extremely inefficient.
         14. If ads block the view, use agent.scroll('down') or agent.scroll('up') to see the game grid.
@@ -84,7 +87,7 @@ class PROCEDURAL_MEMORY:
     Your task is to identify one of two cases:
 
     Case 1. Inefficient or problematic gameplay:
-    - Agent infers letter status from colorful letters outside the grid (incorrect!)
+    - Agent seeing wrong color feedback from the row of the grid
     - Agent typing letters individually instead of full words (MAJOR efficiency issue)
     - Clicking on virtual keyboard instead of using agent.write()
     - Making invalid guesses (non-words, wrong length)
@@ -98,6 +101,8 @@ class PROCEDURAL_MEMORY:
     - Making valid 5-letter words
     - Properly interpreting grid color feedback according to the current game's rules
     - Making strategic guesses based on constraints
+    Case 3. You believe the current task has been completed. In this case, tell the agent that the task has been successfully completed.
+    
     
     Rules for your reflection:
     - DO NOT suggest specific words to guess
