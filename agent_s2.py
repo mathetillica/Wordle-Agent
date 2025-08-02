@@ -3,8 +3,8 @@
 import os, io, sys, time
 from dotenv import load_dotenv
 load_dotenv()
-from gui_agents.s2.agents.agent_s import AgentS2
-from gui_agents.s2.agents.grounding import OSWorldACI
+from gui_agents.s2_5.agents.agent_s import AgentS2_5
+from gui_agents.s2_5.agents.grounding import OSWorldACI
 from orgo import Computer
 import pyautogui
 
@@ -52,8 +52,8 @@ class Executor:
 def create_agent(executor):
     params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
     grounding_model_resize_width = 1366
-    screen_width = 1024
-    screen_height = 768
+    screen_width = 1920
+    screen_height = 1080
     grounding = {
         "engine_type": CONFIG["grounding_type"], 
         "model": CONFIG["grounding_model"],
@@ -61,14 +61,10 @@ def create_agent(executor):
         "grounding_height": (screen_height * grounding_model_resize_width) / screen_width
     }
     
-    return AgentS2(
+    return AgentS2_5(
         engine_params=params,
         grounding_agent=OSWorldACI(executor.platform, params, grounding),
         platform=executor.platform,
-        action_space="pyautogui",
-        observation_type="screenshot",
-        search_engine=CONFIG["search_engine"] if CONFIG["search_engine"] != "none" else None,
-        embedding_engine_type=CONFIG["embedding_type"]
     )
 
 
