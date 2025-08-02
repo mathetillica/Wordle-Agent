@@ -124,7 +124,7 @@ class KnowledgeBase(BaseModule):
 
     def _search(self, instruction: str, search_query: str, search_engine: str) -> str:
         """Execute search using specified engine"""
-        print("I entered _search")
+        
         # Default to perplexica rag knowledge to see if the query exists
         file = os.path.join(
             self.local_kb_path, self.platform, "perplexica_rag_knowledge.json"
@@ -165,7 +165,6 @@ class KnowledgeBase(BaseModule):
         return search_results
 
     def retrieve_narrative_experience(self, instruction: str) -> Tuple[str, str]:
-        print("Retrieving narrative experience")
         """Retrieve narrative experience using embeddings"""
 
         knowledge_base = load_knowledge_base(self.narrative_memory_path)
@@ -192,16 +191,16 @@ class KnowledgeBase(BaseModule):
             candidate_embeddings.append(candidate_embedding)
 
         save_embeddings(self.embeddings_path, embeddings)
-        print("hello1")
+        
         similarities = cosine_similarity(
             instruction_embedding, np.vstack(candidate_embeddings)
         )[0]
-        print("hello2")
+        
         sorted_indices = np.argsort(similarities)[::-1]
 
         keys = list(knowledge_base.keys())
         idx = 1 if keys[sorted_indices[0]] == instruction else 0
-        print("exiting retrieve_narrative_experience")
+        
         return keys[sorted_indices[idx]], knowledge_base[keys[sorted_indices[idx]]]
 
     def retrieve_episodic_experience(self, instruction: str) -> Tuple[str, str]:
