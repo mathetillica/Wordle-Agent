@@ -7,6 +7,11 @@ from gui_agents.s2_5.agents.agent_s import AgentS2_5
 from gui_agents.s2_5.agents.grounding import OSWorldACI
 from orgo import Computer
 import pyautogui
+from function_timer import FunctionTimer
+import time
+
+
+ft = FunctionTimer()
 
 CONFIG = {
     "model": os.getenv("AGENT_MODEL", ""),
@@ -51,14 +56,14 @@ class Executor:
 
 def create_agent(executor):
     params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
-    grounding_model_resize_width = 1366
-    screen_width = 1920
-    screen_height = 1080
+    grounding_model_resize_width = 768
+    screen_width = 1024
+    screen_height = 768
     grounding = {
         "engine_type": CONFIG["grounding_type"], 
         "model": CONFIG["grounding_model"],
-        "grounding_width": grounding_model_resize_width,
-        "grounding_height": (screen_height * grounding_model_resize_width) / screen_width
+        "grounding_width": 1920, #grounding_model_resize_width,
+        "grounding_height": 1080 #(screen_height * grounding_model_resize_width) / screen_width
     }
     
     return AgentS2_5(
@@ -74,6 +79,9 @@ def run_task(agent, executor, instruction):
     
     for step in range(CONFIG["max_steps"]):
         print(f"Step {step + 1}/{CONFIG['max_steps']}")
+        if step:
+            print("Waiting for changes to reflect...")
+            time.sleep(CONFIG["step_delay"])
         
         try:
             info, action = agent.predict(instruction=instruction, observation={"screenshot": executor.screenshot()})
@@ -90,17 +98,19 @@ def run_task(agent, executor, instruction):
             print(f"🔧 {action[0]}")
             executor.exec(action[0])
             
+            
         except Exception as e:
             print(f"❌ Error: {e}")
             done_count = 0
         
-        time.sleep(CONFIG["step_delay"])
+        
     
     print("⏱️ Max steps reached")
     return False
 
 
 def main():
+    ft.start()
     try:
         executor = Executor(CONFIG["remote"])
         agent = create_agent(executor)
@@ -111,13 +121,14 @@ def main():
         print("🎮 Interactive Mode (type 'exit' to quit)\n")
         while (task := input("Task: ").strip()) != "exit":
             if task: run_task(agent, executor, task)
-            
+             
     except KeyboardInterrupt:
         print("\n⚠️ Interrupted")
     except Exception as e:
         print(f"❌ Fatal error: {e}")
         sys.exit(1)
-
+    ft.stop()
+    ft.export_csv("timing_report.csv")
 
 if __name__ == "__main__":
     main()
