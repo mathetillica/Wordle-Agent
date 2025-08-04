@@ -1,2 +1,28 @@
-##orgo-ai-s2-example-requirements
-##agent-s2-requirements
+numpy
+backoff
+pandas
+openai
+anthropic
+fastapi
+uvicorn
+paddleocr
+paddlepaddle
+together
+scikit-learn
+websockets
+tiktoken
+pyautogui
+toml
+black
+pytesseract
+google-genai
+gui-agents
+pyautogui
+python-dotenv
+orgo
+pillow
+
+# Platform-specific dependencies
+pyobjc; platform_system == "Darwin"
+pywinauto; platform_system == "Windows"
+pywin32; platform_system == "Windows" 
