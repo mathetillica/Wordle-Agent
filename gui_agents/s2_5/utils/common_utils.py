@@ -15,7 +15,6 @@ def call_llm_safe(agent, temperature: float = 0.0, use_thinking: bool = False) -
                 temperature=temperature, use_thinking=use_thinking
             )
             assert response is not None, "Response from agent should not be None"
-            print("Response success!")
             break  # If successful, break out of the loop
         except Exception as e:
             attempt += 1

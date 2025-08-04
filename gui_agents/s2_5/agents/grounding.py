@@ -204,7 +204,7 @@ class OSWorldACI(ACI):
 
         # Generate and parse coordinates
         response = call_llm_safe(self.grounding_model)
-        print("RAW GROUNDING MODEL RESPONSE:", response)
+        #print("RAW GROUNDING MODEL RESPONSE:", response)
         numericals = re.findall(r"\d+", response)
         assert len(numericals) >= 2
         return [int(numericals[0]), int(numericals[1])]
@@ -270,7 +270,7 @@ class OSWorldACI(ACI):
 
         # Obtain the target element
         response = call_llm_safe(self.text_span_agent)
-        print("TEXT SPAN AGENT RESPONSE:", response)
+        #print("TEXT SPAN AGENT RESPONSE:", response)
         numericals = re.findall(r"\d+", response)
         if len(numericals) > 0:
             text_id = int(numericals[-1])
