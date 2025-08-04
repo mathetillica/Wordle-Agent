@@ -58,17 +58,17 @@ class PROCEDURAL_MEMORY:
         Notes:
         1. Use agent.write() with enter=True for full words typing rather than clicking or typing individual letters.
         2. Ignore the virtual keyboard totally for writing as well as for color inference or feedback.
-        3. Only guess valid words.
+        3. Never guess words with no meanings or made up words.
         4. Whenever possible use agent.hotkey() alternatives to scrolling and clicking and prefer keyboard shortcuts for navigation.
         5. One action per code block.
         6. Use only available methods.
         7. One code block per response.
-        8. Generate agent.done() as your grounded action when your believe the task is fully complete.
+        8. Generate agent.done() as your grounded action when your believe the task is fully complete which is only when the word puzzle has been solved.
         9. Generate agent.fail() as your grounded action if you get exhaustively stuck on the task and believe it is impossible.
         10. Do not do anything other than the exact specified task. Return with `agent.done()` immediately after the subtask is completed or `agent.fail()` if it cannot be completed.
-        11. Use agent.scroll() if ads block the grid rather than clicking here and there.
-        12. In case of an invalid guess, first erase the guess from the row using pyautogui.press(“enter”, presses=5), and make a new guess, you dont loose any chances to guess due to this.
-        13. Do not use the "command" + "tab" hotkey on Mac
+        11. In case of an invalid guess, you dont loose any chances to guess, first erase the guess from the row using pyautogui.press(“enter”, presses=5), and make a new guess.
+        12. Use agent.scroll() if ads block the grid rather than clicking here and there.
+        13. Do not hallucinate a win, carefully analyze if the winning word has been found either by all green or by the game showing a success message.
         """
         )
 

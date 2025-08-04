@@ -7,11 +7,7 @@ from gui_agents.s2_5.agents.agent_s import AgentS2_5
 from gui_agents.s2_5.agents.grounding import OSWorldACI
 from orgo import Computer
 import pyautogui
-from function_timer import FunctionTimer
-import time
 
-
-ft = FunctionTimer()
 
 CONFIG = {
     "model": os.getenv("AGENT_MODEL", ""),
@@ -110,7 +106,7 @@ def run_task(agent, executor, instruction):
 
 
 def main():
-    ft.start()
+    
     try:
         executor = Executor(CONFIG["remote"])
         agent = create_agent(executor)
@@ -127,8 +123,7 @@ def main():
     except Exception as e:
         print(f"❌ Fatal error: {e}")
         sys.exit(1)
-    ft.stop()
-    ft.export_csv("timing_report.csv")
+    
 
 if __name__ == "__main__":
     main()
