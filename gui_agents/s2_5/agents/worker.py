@@ -46,7 +46,7 @@ class Worker(BaseModule):
         self.enable_reflection = enable_reflection
         self.temperature = engine_params.get("temperature", 0.0)
         self.use_thinking = engine_params.get("model", "") in [
-            "claude-3-7-sonnet-20250219"
+            "claude-3-7-sonnet-20250219", "claude-sonnet-4-202505141"
         ]
         self.reset()
 

@@ -42,7 +42,7 @@ def split_thinking_response(full_response: str) -> Tuple[str, str]:
 
 def parse_single_code_from_string(input_string):
     input_string = input_string.strip()
-    if input_string.strip() in ["WAIT", "DONE", "FAIL"]:
+    if input_string.strip() in ["WAIT", "DONE", "FAIL", "done", "fail"]:
         return input_string.strip()
 
     # This regular expression will match both ```code``` and ```python code```

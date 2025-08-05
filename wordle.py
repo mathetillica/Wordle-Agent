@@ -55,14 +55,14 @@ class Executor:
 
 def create_agent(executor):
     params = {"engine_type": CONFIG["model_type"], "model": CONFIG["model"]}
-    grounding_model_resize_width = 768
-    screen_width = 1024
-    screen_height = 768
+    grounding_model_resize_width = 1366 #For anthropic models
+    screen_width = 1024 #For Orgo VM
+    screen_height = 768 #For Orgo VM
     grounding = {
         "engine_type": CONFIG["grounding_type"], 
         "model": CONFIG["grounding_model"],
-        "grounding_width": 1920, #grounding_model_resize_width,
-        "grounding_height": 1080 #(screen_height * grounding_model_resize_width) / screen_width
+        "grounding_width": grounding_model_resize_width,
+        "grounding_height": (screen_height * grounding_model_resize_width) / screen_width
     }
     
     return AgentS2_5(
@@ -77,14 +77,14 @@ def run_task(agent, executor, instruction):
 
     for step in range(CONFIG["max_steps"]):
         console.print(f"[bold blue]Step {step + 1}/{CONFIG['max_steps']}[/]")
-        console.print("[yellow]⏳ Guessing better than you...[/]")
-        if step:
-            time.sleep(CONFIG["step_delay"])
+        
+        if not done_count : console.print("[yellow]⏳ Guessing better than you...[/]")
+        if step: time.sleep(CONFIG["step_delay"])
 
         try:
             info, action = agent.predict(instruction=instruction, observation={"screenshot": executor.screenshot()})
             #if info:
-                #console.print(f"[italic green]💭 Thought:[/] {info}")
+             #   console.print(f"[italic green]💭 Thought:[/] {info}")
 
             if not action or not action[0] or action[0].strip().upper() == "DONE":
                 done_count += 1
